@@ -21,6 +21,8 @@ public class ObjectScatterer : MonoBehaviour
         {
             Vector3 randomPos = GetRandomPosition();
 
+            
+
             if (Physics.Raycast(randomPos, Vector3.down, out RaycastHit hit, 100f, groundLayer))
             {
                 float heightOffset = objectToSpawn.GetComponent<Renderer>().bounds.extents.y;
