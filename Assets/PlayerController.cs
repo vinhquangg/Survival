@@ -1,10 +1,10 @@
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     private InputHandler inputHandler;
     private CharacterController controller;
+    private AnimationStateController animationController;
 
     public float moveSpeed = 5f;
     public float lookSensitivity = 1f;
@@ -19,11 +19,11 @@ public class PlayerController : MonoBehaviour
     private Vector3 velocity;
     private bool isGrounded;
 
-
     private void Awake()
     {
         inputHandler = GetComponent<InputHandler>();
         controller = GetComponent<CharacterController>();
+        animationController = GetComponent<AnimationStateController>();
     }
 
     private void Start()
@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector2 moveInput = inputHandler.playerAction.Move.ReadValue<Vector2>();
-        MovePlayer(moveInput);
+        HandleMove(moveInput);
         HandleLook();
 
         velocity.y += gravity * Time.deltaTime;
@@ -51,11 +51,20 @@ public class PlayerController : MonoBehaviour
         Cursor.visible = false;
     }
 
-    private void MovePlayer(Vector2 moveInput)
+    private void HandleMove(Vector2 moveInput)
     {
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        float inputMagnitude = moveInput.magnitude;
+
+        bool isMoving = inputMagnitude >= 0.1f;
+        bool isRunning = isMoving && Input.GetKey(KeyCode.LeftShift);
+
+        float speedMultiplier = isRunning ? 1f : (isMoving ? 0.5f : 0f);
+        controller.Move(move * moveSpeed * speedMultiplier * Time.deltaTime);
+
+        animationController.UpdateAnimationState(isMoving, isRunning);
     }
+
 
     private void HandleLook()
     {
@@ -64,7 +73,6 @@ public class PlayerController : MonoBehaviour
 
         xRotation -= look.y;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
         playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         transform.Rotate(Vector3.up * look.x);
