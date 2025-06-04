@@ -13,6 +13,9 @@ public class SelectionManager : MonoBehaviour
     public LayerMask interactableLayer;
     TextMeshProUGUI interact_text;
     TextMeshProUGUI interact_type;
+
+    private IInteractable currentInteractable;
+    public IInteractable CurrentInteractable => currentInteractable;
     void Start()
     {
         interact_text= interaction_Info.GetComponent<TextMeshProUGUI>();
@@ -28,30 +31,24 @@ public class SelectionManager : MonoBehaviour
         if (Physics.Raycast(ray, out hit, 100f, interactableLayer))
         {
             var selectionTransform = hit.transform;
+            var interactable = selectionTransform.GetComponent<IInteractable>();
 
-            var interactable = selectionTransform.GetComponent<InteractableObject>();
-            if (interactable)
+            if (interactable != null)
             {
                 float distance = Vector3.Distance(Camera.main.transform.position, hit.point);
                 if (distance <= interactionDistance)
                 {
                     ShowInteractionUI(interactable.GetItemName(), interactable.GetItemType());
-                }
-                else
-                {
-                    HideInteractionUI();
+                    currentInteractable = interactable;
+                    return;
                 }
             }
-            else
-            {
-                HideInteractionUI();
-            }
         }
-        else
-        {
-            HideInteractionUI();
-        }
+
+        HideInteractionUI();
+        currentInteractable = null;
     }
+
 
 
     void ShowInteractionUI(string name, string type)
