@@ -57,13 +57,16 @@ public class PlayerController : MonoBehaviour
         float inputMagnitude = moveInput.magnitude;
 
         bool isMoving = inputMagnitude >= 0.1f;
-        bool isRunning = isMoving && Input.GetKey(KeyCode.LeftShift);
+
+        bool isRunning = isMoving && moveInput.y > 0f && Input.GetKey(KeyCode.LeftShift);
 
         float speedMultiplier = isRunning ? 1f : (isMoving ? 0.5f : 0f);
         controller.Move(move * moveSpeed * speedMultiplier * Time.deltaTime);
 
-        animationController.UpdateAnimationState(isMoving, isRunning);
+        animationController.UpdateAnimationState(moveInput, isRunning);
     }
+
+
 
 
     private void HandleLook()

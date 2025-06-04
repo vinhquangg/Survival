@@ -3,46 +3,39 @@
 public class AnimationStateController : MonoBehaviour
 {
     private Animator animator;
-    private float blend = 0.0f;
-    private float acceleration = 2.0f;    // tốc độ tăng blend
-    private float deceleration = 4.0f;    // tốc độ giảm blend
-    private int blendHash;
+
+    // blend tốc độ mượt hơn nếu cần
+    private float acceleration = 4f;
+    private float deceleration = 6f;
+    private Vector2 currentVelocity = Vector2.zero;
+
+    private int moveXHash;
+    private int moveYHash;
+    private int isRunHash;
 
     private void Start()
     {
         animator = GetComponent<Animator>();
         if (animator == null)
         {
-            Debug.LogError("Animator component not found on this GameObject.");
+            Debug.LogError("Animator not found!");
             return;
         }
 
-        blendHash = Animator.StringToHash("Blend");
+        moveXHash = Animator.StringToHash("Velocity X");
+        moveYHash = Animator.StringToHash("Velocity Y");
+        isRunHash = Animator.StringToHash("isRun");
     }
 
-    public void UpdateAnimationState(bool isMoving, bool isRunning)
+    public void UpdateAnimationState(Vector2 input, bool isRunning)
     {
-        float targetBlend = 0f;
+        // mượt hóa input (nếu cần, không bắt buộc)
+        currentVelocity = Vector2.MoveTowards(currentVelocity, input,
+                            (isRunning ? acceleration : deceleration) * Time.deltaTime);
 
-        if (isMoving)
-        {
-            targetBlend = isRunning ? 1f : 0.5f;
-        }
-
-        if (blend < targetBlend)
-        {
-            blend += acceleration * Time.deltaTime;
-        }
-
-        if (blend > targetBlend && !isMoving)
-        {
-            blend -= deceleration * Time.deltaTime;
-        }
-        if(isMoving && blend < 0.0f)
-        {
-            blend = 0.0f;
-        }
-
-        animator.SetFloat(blendHash, blend);
+        // Gán giá trị vào Animator
+        animator.SetFloat(moveXHash, currentVelocity.x);
+        animator.SetFloat(moveYHash, currentVelocity.y);
+        animator.SetBool(isRunHash, isRunning);
     }
 }
