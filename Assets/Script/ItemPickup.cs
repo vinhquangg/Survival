@@ -1,11 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemPickup : MonoBehaviour, IInteractable
 {
+    public ItemClass itemdata;
     private InteractableObject InteractableObject;
-
     private void Start()
     {
         InteractableObject = GetComponent<InteractableObject>();
@@ -24,11 +24,24 @@ public class ItemPickup : MonoBehaviour, IInteractable
         return InteractableObject.GetItemType();
     }
 
-    public void Interact()
+    //public void Interact()
+    //{
+    //    if (inventory != null)
+    //    {
+    //        inventory.AddItem(itemdata);
+    //        //Destroy(gameObject); // Xoá object khỏi scene sau khi nhặt
+    //        gameObject.SetActive(false);
+    //    }
+    //}
+
+    public void Interact(GameObject interactor)
     {
-        Debug.Log("Adding item to inventory: ");
-        gameObject.SetActive(false);
+        var inventory = interactor.GetComponentInChildren<InventoryManager>();
+        if (inventory != null && itemdata != null)
+        {
+            inventory.AddItem(itemdata);
+            Debug.Log("Nhặt item: " + itemdata.itemName);
+            Destroy(gameObject);
+        }
     }
-
-
 }

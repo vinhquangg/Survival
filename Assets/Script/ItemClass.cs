@@ -12,4 +12,6 @@ public abstract class ItemClass:ScriptableObject
     public abstract ToolClass GetTool();
     public abstract MiscClass GetMisc();
     public abstract Consumable GetConsumable();
+
+    public abstract float GetDurability();
 }

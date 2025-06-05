@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,7 +22,8 @@ public class InteractionManager : MonoBehaviour
             return;
         if (SelectionManager != null && Input.GetKeyDown(KeyCode.E))
         {
-            SelectionManager.CurrentInteractable?.Interact();
+            SelectionManager.CurrentInteractable?.Interact(transform.root.gameObject);
+
         }
     }
 }

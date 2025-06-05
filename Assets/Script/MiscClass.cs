@@ -8,4 +8,5 @@ public class MiscClass : ItemClass
     public override ToolClass GetTool() { return null; }
     public override MiscClass GetMisc() { return this; }
     public override Consumable GetConsumable() { return null; }
+    public override float GetDurability() => -1f;
 }

@@ -1,43 +1,97 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    public ItemClass itemToAdd;
-    public ItemClass itemToremove;
+    public List<SlotClass> items = new List<SlotClass>();
+    public List<SlotClass> hotbarItems = new List<SlotClass>();
+    public GameObject inventoryPanel;
 
-    public List<ItemClass> inventory = new List<ItemClass>();
-
-    private void Start()
+    public InventoryUIHandler inventoryUI;
+    public InventoryUIHandler hotbarUI;
+    private bool isInventoryOpen = false;
+    void Start()
     {
-        AddItem(itemToAdd);
-        RemoveItem(itemToremove);
+        inventoryUI.Init();
+        hotbarUI.Init();
+        RefreshAllUI();
     }
-    
+
     public void AddItem(ItemClass item)
     {
-        if (item != null)
+
+        SlotClass slot = Contains(item);
+        if(slot != null)
         {
-            inventory.Add(item);
-            Debug.Log("Item added: " + item.itemName);
+            slot.SetQuantity(1);
         }
         else
         {
-            Debug.LogWarning("Attempted to add a null item.");
+            items.Add(new SlotClass(item, 1));
+        }
+        RefreshAllUI();
+        //if (item != null)
+        //{
+        //    items.Add(item);
+        //    Debug.Log("Item added: " + item.itemName);
+
+        //    if (isInventoryOpen)
+        //        RefreshAllUI();
+        //}
+    }
+
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            isInventoryOpen = !isInventoryOpen;
+            inventoryPanel.SetActive(isInventoryOpen);
+
+            // Nếu bật thì cập nhật UI
+            if (isInventoryOpen)
+            {
+                RefreshAllUI();
+            }
         }
     }
 
     public void RemoveItem(ItemClass item)
     {
-        if (item != null && inventory.Contains(item))
+        SlotClass slotToRemove = new SlotClass();
+        foreach (SlotClass slot in items)
         {
-            inventory.Remove(item);
-            Debug.Log("Item removed: " + item.itemName);
+            if(slot.GetItem()==item)
+            {
+                slotToRemove= slot;
+                break;
+            }
         }
-        else
+        items.Remove(slotToRemove);
+        RefreshAllUI();
+        //if (item != null && items.Contains(item))
+        //{
+        //    items.Remove(item);
+        //    Debug.Log("Item removed: " + item.itemName);
+        //    RefreshAllUI();
+        //}
+    }
+
+    public SlotClass Contains(ItemClass item)
+    {
+        foreach (SlotClass slot in items)
         {
-            Debug.LogWarning("Attempted to remove an item that is not in the inventory or is null.");
+            if(slot.GetItem()==item)
+            {
+                return slot;
+            }
         }
+        return null;
+    }
+
+    private void RefreshAllUI()
+    {
+        inventoryUI.RefreshUI(items);
+        hotbarUI.RefreshUI(hotbarItems.Count > 0 ? hotbarItems : items); 
     }
 }

@@ -1,15 +1,16 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "NewTool", menuName = "Item/Tool")]
 public class ToolClass : ItemClass
 {
     public ToolType toolType;
+    public float durability = 1f; 
     public ToolClass()
     {
         itemType = ItemType.Tool;
         itemName = "Tool";
-        itemIcon = null; // Assign a default icon or leave it null
+        itemIcon = null; 
         toolType = ToolType.None;
     }
 
@@ -27,4 +28,8 @@ public class ToolClass : ItemClass
     public override MiscClass GetMisc() { return null; }
     public override Consumable GetConsumable() { return null; }
 
+    public override float GetDurability()
+    {
+        return durability;
+    }
 }
