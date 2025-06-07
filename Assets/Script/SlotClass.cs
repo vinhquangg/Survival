@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+[System.Serializable]
 public class SlotClass
 {
-    private ItemClass item;
-    private int quantity;
+    [SerializeField] private ItemClass item;
+    [SerializeField] private int quantity;
     private float durability;
     
     public SlotClass()
@@ -28,17 +28,19 @@ public class SlotClass
 
     public ItemClass GetItem() { return item; }
     public int GetQuantity() { return quantity; }
-
-    // Getters
-    //public ItemClass GetItem() => item;
-    //public int GetQuantity() => quantity;
     public float GetDurability() => durability;
-
     // Setters
-    public void SetItem(ItemClass newItem) => item = newItem;
-    public void SetQuantity(int newQty) => quantity += newQty;
+    public void AddQuantity(int value) => quantity += value;
+    public void SubQuantity(int value) => quantity -= value;
     public void SetDurability(float value) => durability = Mathf.Clamp01(value);
-
-    public bool IsEmpty() => item == null;
     public bool IsTool() => item != null && item.itemType == ItemType.Tool;
+    public bool IsEmpty() 
+    {
+        return this.item == null || this.quantity <=0;
+    }
+    public void AddItem(ItemClass newItem, int quantity)
+    {
+        this.item = newItem;
+        this.quantity = quantity;
+    }
 }

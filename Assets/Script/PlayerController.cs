@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         inputHandler.EnablePlayerInput();
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.SetCursorLock(true);
+        }
     }
 
     private void Update()
@@ -47,8 +51,6 @@ public class PlayerController : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     private void HandleMove(Vector2 moveInput)
@@ -65,9 +67,6 @@ public class PlayerController : MonoBehaviour
 
         animationController.UpdateAnimationState(moveInput, isRunning);
     }
-
-
-
 
     private void HandleLook()
     {

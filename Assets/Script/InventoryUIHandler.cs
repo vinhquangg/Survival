@@ -1,63 +1,74 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 public class InventoryUIHandler : MonoBehaviour
 {
-    public GameObject slotHolder; 
+    public GameObject slotHolder;
+    public InventoryManager inventoryManager;
     private GameObject[] slots;
 
-    public void Init()
+    public InventoryArea area;
+    public GameObject[] Init()
     {
         slots = new GameObject[slotHolder.transform.childCount];
-        for (int i = 0; i < slotHolder.transform.childCount; i++)
+        for (int i = 0; i < slots.Length; i++)
         {
-            slots[i] = slotHolder.transform.GetChild(i).gameObject;
+            var slot = slotHolder.transform.GetChild(i).gameObject;
+
+            var ui = slot.GetComponent<InventorySlotUI>();
+            ui.slotIndex = i;
+            ui.inventoryArea = area;
+            ui.inventoryManager = inventoryManager;
+
+            slots[i] = slot;
         }
+        return slots;
     }
 
-    public void RefreshUI(List<SlotClass> slots)
-    {
-        for (int i = 0; i < this.slots.Length; i++)
-        {
-            var image = this.slots[i].transform.GetChild(0).GetComponent<Image>();
-            var text = this.slots[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-            var slider = this.slots[i].transform.GetChild(2).GetComponent<Slider>();
 
-            if (i < slots.Count && !slots[i].IsEmpty())
+    public void RefreshUI(SlotClass[] dataSlots)
+    {
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var uiRef = slots[i].GetComponent<SlotUIRef>();
+            if (uiRef == null) continue;
+
+            if (i < dataSlots.Length && dataSlots[i] != null && !dataSlots[i].IsEmpty())
             {
-                var slot = slots[i];
+                var slot = dataSlots[i];
                 var item = slot.GetItem();
 
-                image.sprite = item.itemIcon;
-                image.enabled = true;
+                uiRef.iconImage.sprite = item.itemIcon;
+                uiRef.iconImage.enabled = true;
 
                 if (slot.IsTool())
                 {
-                    slider.gameObject.SetActive(true);
-                    slider.value = slot.GetDurability();
-                    text.text = "";
-                    text.gameObject.SetActive(false);
+                    uiRef.durabilitySlider.gameObject.SetActive(true);
+                    uiRef.durabilitySlider.value = slot.GetDurability();
+
+                    uiRef.amountText.text = "";
+                    uiRef.amountText.gameObject.SetActive(false);
                 }
                 else
                 {
-                    slider.gameObject.SetActive(false);
-                    text.text = slot.GetQuantity().ToString();
-                    text.gameObject.SetActive(true);
+                    uiRef.durabilitySlider.gameObject.SetActive(false);
+                    uiRef.amountText.text = slot.GetQuantity().ToString();
+                    uiRef.amountText.gameObject.SetActive(true);
                 }
             }
             else
             {
-                image.sprite = null;
-                image.enabled = false;
-                text.text = "";
-                text.gameObject.SetActive(true);
-                slider.gameObject.SetActive(false);
+                uiRef.iconImage.sprite = null;
+                uiRef.iconImage.enabled = false;
+                uiRef.amountText.text = "";
+                uiRef.amountText.gameObject.SetActive(true);
+                uiRef.durabilitySlider.gameObject.SetActive(false);
             }
         }
     }
 
-
-
+    public int GetSlotCount()
+    {
+        return slotHolder.transform.childCount;
+    }
 }

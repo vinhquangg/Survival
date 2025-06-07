@@ -40,7 +40,6 @@ public class ItemPickup : MonoBehaviour, IInteractable
         if (inventory != null && itemdata != null)
         {
             inventory.AddItem(itemdata);
-            Debug.Log("Nhặt item: " + itemdata.itemName);
             Destroy(gameObject);
         }
     }
