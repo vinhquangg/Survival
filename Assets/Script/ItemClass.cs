@@ -10,6 +10,7 @@ public abstract class ItemClass:ScriptableObject
     public Sprite itemIcon;
     public bool isStack;
     public int maxStack;
+    public GameObject dropPrefab;
     public abstract ItemClass GetItem();
     public abstract ToolClass GetTool();
     public abstract MiscClass GetMisc();

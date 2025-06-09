@@ -10,8 +10,10 @@ public class InventoryManager : MonoBehaviour
     public GameObject inventoryPanel;
     public InventoryUIHandler inventoryUI;
     public InventoryUIHandler hotbarUI;
+    public ItemDropper dropper;
     private PlayerController PlayerController;
     private bool isInventoryOpen = false;
+
     void Awake()
     {
         inventoryUI.inventoryManager = this;
@@ -29,34 +31,27 @@ public class InventoryManager : MonoBehaviour
     {
         RefreshAllUI();
         PlayerController = FindObjectOfType<PlayerController>();
+        dropper.playerTransform = PlayerController.transform;
     }
 
 
-public bool AddItem(ItemClass item)
-{
-    if (item == null)
-        return false;
-
-    if (item.isStack)
+    public bool AddItem(ItemClass item, int quantity = 1)
     {
-        // Stack vào Inventory trước
-        if (TryStackItem(InventoryArea.Inventory, item)) return true;
+        if (item == null || quantity <= 0)
+            return false;
 
-        // Nếu không, stack vào Hotbar
-        if (TryStackItem(InventoryArea.Hotbar, item)) return true;
+        if (item.isStack)
+        {
+            if (TryStackItem(InventoryArea.Inventory, item, ref quantity)) return true;
+            if (TryStackItem(InventoryArea.Hotbar, item, ref quantity)) return true;
+        }
+
+        if (TryAddToEmptySlot(InventoryArea.Hotbar, item, ref quantity)) return true;
+        if (TryAddToEmptySlot(InventoryArea.Inventory, item, ref quantity)) return true;
+
+        Debug.LogWarning("Không thể thêm item, inventory & hotbar đầy.");
+        return false;
     }
-
-    // Nếu không stack được, tìm slot trống trong hotbar trước
-    if (TryAddToEmptySlot(InventoryArea.Hotbar, item)) return true;
-
-    // Sau cùng mới đến inventory
-    if (TryAddToEmptySlot(InventoryArea.Inventory, item)) return true;
-
-    Debug.LogWarning("Không thể thêm item, inventory & hotbar đầy.");
-    return false;
-}
-
-
 
     void Update()
     {
@@ -66,7 +61,7 @@ public bool AddItem(ItemClass item)
         }
     }
 
-    private bool TryStackItem(InventoryArea area, ItemClass item)
+    private bool TryStackItem(InventoryArea area, ItemClass item, ref int quantity)
     {
         var container = GetContainer(area);
 
@@ -77,16 +72,21 @@ public bool AddItem(ItemClass item)
                 slot.GetItem() == item &&
                 slot.GetQuantity() < item.maxStack)
             {
-                slot.AddQuantity(1);
-                RefreshAllUI();
-                return true;
+                int canAdd = Mathf.Min(quantity, item.maxStack - slot.GetQuantity());
+                slot.AddQuantity(canAdd);
+                quantity -= canAdd;
+
+                if (quantity <= 0)
+                {
+                    RefreshAllUI();
+                    return true;
+                }
             }
         }
         return false;
     }
 
-
-    private bool TryAddToEmptySlot(InventoryArea area, ItemClass item)
+    private bool TryAddToEmptySlot(InventoryArea area, ItemClass item, ref int quantity)
     {
         var container = GetContainer(area);
 
@@ -94,15 +94,19 @@ public bool AddItem(ItemClass item)
         {
             if (container[i] == null || container[i].IsEmpty())
             {
-                container[i] = new SlotClass(item, 1);
-                RefreshAllUI();
-                return true;
+                int toAdd = Mathf.Min(quantity, item.maxStack);
+                container[i] = new SlotClass(item, toAdd);
+                quantity -= toAdd;
+
+                if (quantity <= 0)
+                {
+                    RefreshAllUI();
+                    return true;
+                }
             }
         }
         return false;
     }
-
-
 
     public bool RemoveItem(ItemClass item)
     {
@@ -134,25 +138,6 @@ public bool AddItem(ItemClass item)
         }
         RefreshAllUI();
         return true;
-        //for (int i = 0; i < items.Length; i++)
-        //{
-        //    var slot = items[i];
-        //    if (slot != null && slot.GetItem() == item)
-        //    {
-        //        if (slot.GetQuantity() > 1)
-        //        {
-        //            slot.SubQuantity(1);
-        //        }
-        //        else
-        //        {
-        //            items[i] = null;
-        //        }
-
-        //        RefreshAllUI();
-        //        return true;
-        //    }
-        //}
-
 
     }
 
@@ -224,9 +209,6 @@ public bool AddItem(ItemClass item)
         RefreshAllUI();
     }
 
-
-
-
     public void SplitItem(InventoryArea area, int fromIndex)
     {
         var container = area == InventoryArea.Hotbar ? hotbarItems : items;
@@ -266,7 +248,18 @@ public bool AddItem(ItemClass item)
         return null;
     }
 
+    public void DropItemToWorld(InventoryArea area, int index)
+    {
+        var container = GetContainer(area);
+        if (container == null || index < 0 || index >= container.Length) return;
 
+        var slot = container[index];
+        if (slot == null || slot.IsEmpty()) return;
+
+        dropper.Drop(slot.GetItem(), slot.GetQuantity(), slot.GetDurability());
+        container[index] = null;
+        RefreshAllUI();
+    }
 
     public void RefreshAllUI()
     {

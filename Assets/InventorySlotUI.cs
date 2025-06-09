@@ -56,7 +56,17 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (dragIcon != null)
             Destroy(dragIcon);
 
-        inventoryManager.RefreshAllUI();
+
+        bool isOutUI = eventData.pointerEnter == null || eventData.pointerEnter.GetComponentInParent<InventoryUIHandler>()==null;
+
+        if (isOutUI && eventData.button == PointerEventData.InputButton.Left)
+        {
+            inventoryManager.DropItemToWorld(inventoryArea, slotIndex);
+        }
+        else
+        {
+            inventoryManager.RefreshAllUI();
+        }
     }
 
     public void OnDrop(PointerEventData eventData)

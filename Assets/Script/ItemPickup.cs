@@ -4,16 +4,22 @@ using UnityEngine;
 
 public class ItemPickup : MonoBehaviour, IInteractable
 {
-    public ItemClass itemdata;
+    private ItemEntity itemEntity;
     private InteractableObject InteractableObject;
-    private void Start()
+
+
+    private void Awake()
     {
+        itemEntity = GetComponent<ItemEntity>();
+        if (itemEntity == null)
+            Debug.LogError("Missing ItemEntity on ItemPickup");
         InteractableObject = GetComponent<InteractableObject>();
         if (InteractableObject == null)
         {
             Debug.LogError("ItemPickup requires an InteractableObject component.");
         }
     }
+
     public string GetItemName()
     {
         return InteractableObject.GetItemName();
@@ -24,22 +30,12 @@ public class ItemPickup : MonoBehaviour, IInteractable
         return InteractableObject.GetItemType();
     }
 
-    //public void Interact()
-    //{
-    //    if (inventory != null)
-    //    {
-    //        inventory.AddItem(itemdata);
-    //        //Destroy(gameObject); // Xoá object khỏi scene sau khi nhặt
-    //        gameObject.SetActive(false);
-    //    }
-    //}
-
     public void Interact(GameObject interactor)
     {
         var inventory = interactor.GetComponentInChildren<InventoryManager>();
-        if (inventory != null && itemdata != null)
+        if (inventory != null)
         {
-            inventory.AddItem(itemdata);
+            inventory.AddItem(itemEntity.GetItemData(), itemEntity.GetQuantity());
             Destroy(gameObject);
         }
     }
