@@ -92,7 +92,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 019aba04622c63047bd376835bf4f294, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slotIndex: 0
   inventoryManager: {fileID: 0}
   inventoryArea: 0
 --- !u!114 &2814273166126751657
